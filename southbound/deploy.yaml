@@ -12,7 +12,6 @@
       debug:
         var: etcd_data.stdout
 
-
     - name: Parse retrieved data
       set_fact:
         etcd_data_parsed: "{{ etcd_data.stdout.split('\n')[1] | from_yaml }}"
@@ -21,30 +20,50 @@
       debug:
         var: etcd_data_parsed
 
-
-    - name: Create variables from subnet data
-      set_fact:
-        bridge_name: "{{ bridge_name | default([]) +  [{{ etcd_data_parsed | dict2items | map(attribute='value.name') | first }}_{{ item.name }}_{{ item.networkType }}] }}"
-        subnet_data: "{{ subnet_data | default([]) + [item] }}"
-        subnet_names: "{{ subnet_names | default([]) + [item.name] }}"
+    - name: Create OpenVSwitch bridges for each subnet
+      openvswitch.openvswitch.openvswitch_bridge:
+        bridge: "{{ item.name }}_{{ item.networkType }}"
+        state: present
       loop: "{{ etcd_data_parsed | dict2items | map(attribute='value.vpcs') | flatten | map(attribute='subnets') | flatten }}"
       loop_control:
         loop_var: item
 
-    - name: Create OpenVSwitch bridges for each subnet
-      openvswitch.openvswitch.openvswitch_bridge:
-        bridge: "{{ bridge_name }}"
-        state: present
-      loop: "{{ subnet_names }}"
+    - name: Debug OpenVSwitch bridges for each subnet
+      debug:
+        msg: "{{ item.name }}_{{ item.networkType }}"
+      loop: "{{ etcd_data_parsed | dict2items | map(attribute='value.vpcs') | flatten | map(attribute='subnets') | flatten }}"
       loop_control:
         loop_var: item
 
-    - name: Create OpenVSwitch bridges for each subnet
-      debug:
-        msg: "{{ bridge_name }}"
-      loop: "{{ subnet_names }}"
+    - name: Activate OpenVSwitch bridges
+      command: "ip link set {{ item.name }}_{{ item.networkType }} up"
+      loop: "{{ etcd_data_parsed | dict2items | map(attribute='value.vpcs') | flatten | map(attribute='subnets') | flatten }}"
       loop_control:
         loop_var: item
+  
+    # - name: Create variables from subnet data
+    #   set_fact:
+    #     bridge_name: "{{ bridge_name | default([]) +  [{{ etcd_data_parsed | dict2items | map(attribute='value.name') | first }}_{{ item.name }}_{{ item.networkType }}] }}"
+    #     subnet_data: "{{ subnet_data | default([]) + [item] }}"
+    #     subnet_names: "{{ subnet_names | default([]) + [item.name] }}"
+    #   loop: "{{ etcd_data_parsed | dict2items | map(attribute='value.vpcs') | flatten | map(attribute='subnets') | flatten }}"
+    #   loop_control:
+    #     loop_var: item
+
+    # - name: Create OpenVSwitch bridges for each subnet
+    #   openvswitch.openvswitch.openvswitch_bridge:
+    #     bridge: "{{ bridge_name }}"
+    #     state: present
+    #   loop: "{{ subnet_names }}"
+    #   loop_control:
+    #     loop_var: item
+
+    # - name: Create OpenVSwitch bridges for each subnet
+    #   debug:
+    #     msg: "{{ bridge_name }}"
+    #   loop: "{{ subnet_names }}"
+    #   loop_control:
+    #     loop_var: item
 
 
     # - name: Create OpenVSwitch bridges for each subnet
@@ -62,11 +81,12 @@
     #   loop_control:
     #     loop_var: item
 
-    # - name: Activate OpenVSwitch bridges
-    #   command: "ip link set {{ etcd_data_parsed | dict2items | map(attribute='value.name') | first }}_{{ item.name }}_{{ item.networkType }} up"
-    #   loop: "{{ etcd_data_parsed | dict2items | map(attribute='value.vpcs') | flatten | map(attribute='subnets') | flatten }}"
-    #   loop_control:
-    #     loop_var: item
+    # - name: Create OpenVSwitch bridge
+    #   openvswitch.openvswitch.openvswitch_bridge:
+    #     bridge: "testing_bridge"
+    #     state: present    
+
+    
 
     # - name: Create OpenVSwitch bridges for each subnet
     #   openvswitch.openvswitch.openvswitch_bridge:

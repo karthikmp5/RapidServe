@@ -25,6 +25,8 @@ Running etcd
 # start a local etcd server
 /tmp/etcd-download-test/etcd
 
+etcd --advertise-client-urls=http://127.0.0.1:1234 --listen-client-urls=http://0.0.0.0:1234 --listen-peer-urls=http://127.0.0.1:1235
+
 # write,read to etcd
 /tmp/etcd-download-test/etcdctl --endpoints=localhost:2379 put foo bar
 /tmp/etcd-download-test/etcdctl --endpoints=localhost:2379 get foo

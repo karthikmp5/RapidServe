@@ -5,7 +5,7 @@
 
   tasks:
     - name: Retrieve data from etcd
-      command: python3 retrive_etcd.py
+      command: python3 retrive_etcd.py netflix
       register: etcd_data
 
     - name: Debug etcd data

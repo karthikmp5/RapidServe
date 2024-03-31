@@ -3,258 +3,125 @@ tenants:
     numberOfVpcs: '2'
     vpcs:
       - name: 'netflix1'
-        network: '172.16.1.0/30'
+        network: '192.168.1.0/24'
         numberOfSubnets: '2'
-        state: 'requested'
 
         subnets:
           - name: 'n1_sub1'
             networkType: 'router'
-            CIDR: '192.168.1.0/30'
-
+            CIDR: '192.168.1.0/24'
             numberOfVM: '1'
-            state: 'requested'
 
           - name: 'n1_sub2'
             networkType: 'bridge'
             CIDR: '192.168.2.0/24'
             numberOfVM: '1'
-            state: 'requested'
 
+        VMs:
+          - name: 'netflix111'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["n1_sub1"]
+          
+          - name: 'netflix121'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["n1_sub1", "n1_sub2"]
 
       - name: 'netflix2'
-        network: '172.16.2.0/30'
+        network: '192.168.2.0/24'
         numberOfSubnets: '2'
-        state: 'requested'
 
         subnets:
           - name: 'n2_sub1'
             networkType: 'router'
             CIDR: '192.168.3.0/24'
             numberOfVM: '1'
-            state: 'requested'
-
+          
           - name: 'n2_sub2'
             networkType: 'bridge'
             CIDR: '192.168.4.0/24'
-            numberOfVM: '1'
-            state: 'requested'
+            numberOfVM: '1'          
 
-    
-    VMs:
-      - name: 'netflix111'
-        vpc: 'netflix1'
-        subnet: '[n1_sub1]'
-        model: 'ubuntu'
-        RAM_size: '2048'
-        CPUs: '2'
-        disk_size: '12'
-        state: 'requested'
-
-      
-      - name: 'netflix121'
-        vpc: 'netflix1'
-        subnet: '[n1_sub2]'
-        model: 'ubuntu'
-        RAM_size: '2048'
-        CPUs: '2'
-        disk_size: '12'
-        state: 'requested'
-
-
-      - name: 'netflix211'
-        vpc: 'netflix2'
-        subnet: '[n2_sub1]'
-        model: 'ubuntu'
-        RAM_size: '2048'
-        CPUs: '2'
-        disk_size: '12'
-        state: 'requested'
-
-      - name: 'netflix221'
-        vpc: 'netflix2'
-        subnet: '[n2_sub2]'
-        model: 'ubuntu'
-        RAM_size: '2048'
-        CPUs: '2'
-        disk_size: '12'
-        state: 'requested'
-
-    cdn: 
-      domainName: 'netflix.cdn.com'
-      location: 'NC'
-      originServerIP: '1.1.1.1'
-      originPort: '3060'
-
-
+        VMs:
+          - name: 'netflix211'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["n2_sub1"]
+        
+          - name: 'netflix221'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["n2_sub1", "n2_sub2"]
 
 
   - name: 'hotstar' #Org name
     numberOfVpcs: '2'
     vpcs:
       - name: 'hotstar1'
-        network: '172.16.3.0/30'
+        network: '192.168.1.0/24'
         numberOfSubnets: '2'
-        state: 'requested'
 
         subnets:
           - name: 'h1_sub1'
             networkType: 'router'
-            CIDR: '192.168.1.0/24'
+            CIDR: '192.168.1.0/25'
             numberOfVM: '1'
-            state: 'requested'
-
           
           - name: 'h1_sub2'
             networkType: 'bridge'
-            CIDR: '192.168.2.0/24'
+            CIDR: '192.168.1.128/25'
             numberOfVM: '1'
-            state: 'requested'
+
+        VMs:
+          - name: 'hotstar111'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["h1_sub1"]
+      
+          - name: 'hotstar121'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["h1_sub1", "h1_sub2"]
 
       - name: 'hotstar2'
-        network: '172.16.4.0/30'
+        network: '192.168.2.0/24'
         numberOfSubnets: '2'
-        state: 'requested'
 
         subnets:
           - name: 'h2_sub1'
             networkType: 'router'
-            CIDR: '192.168.3.0/24'
+            CIDR: '192.168.1.0/25'
             numberOfVM: '1'
-            state: 'requested'
 
-                 
           - name: 'h2_sub2'
             networkType: 'bridge'
-            CIDR: '192.168.4.0/24'
+            CIDR: '192.168.128.0/25'
             numberOfVM: '1'
-            state: 'requested'
-          
-    VMs:
-      - name: 'hotstar111'
-        vpc: 'hotstar1'
-        subnet: '[h1_sub1]'
-        model: 'ubuntu'
-        RAM_size: '2048'
-        CPUs: '2'
-        disk_size: '12'
-        state: 'requested'
 
-      - name: 'hotstar121'
-        vpc: 'hotstar1'
-        subnet: '[h1_sub2]'
-        model: 'ubuntu'
-        RAM_size: '2048'
-        CPUs: '2'
-        disk_size: '12'
-        state: 'requested'
-      
-      - name: 'hotstar211'
-        vpc: 'hotstar2'
-        subnet: '[h2_sub1]'
-        model: 'ubuntu'
-        RAM_size: '2048'
-        CPUs: '2'
-        disk_size: '12'
-        state: 'requested'
+        VMs:
+          - name: 'hotstar211'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["h2_sub1"]
 
-      - name: 'hotstar221'
-        vpc: 'hotstar2'
-        subnet: '[h2_sub2]'
-        model: 'ubuntu'
-        RAM_size: '2048'
-        CPUs: '2'
-        disk_size: '12'
-        state: 'requested'
-
-    cdn: 
-      domainName: 'netflix.cdn.com'
-      location: 'NC'
-      originServerIP: '1.1.1.1'
-      originPort: '3060'
-
-
-
-  - name: 'disney' #Org name
-    numberOfVpcs: '2'
-    vpcs:
-      - name: 'disney1'
-        network: '172.16.1.0/30'
-        numberOfSubnets: '2'
-        state: 'requested'
-
-        subnets:
-          - name: 'd1_sub1'
-            networkType: 'router'
-            CIDR: '192.168.1.0/24'
-            numberOfVM: '1'
-            state: 'requested'
-
-          - name: 'd1_sub2'
-            networkType: 'bridge'
-            CIDR: '192.168.2.0/24'
-            numberOfVM: '1'
-            state: 'requested'
-
-      - name: 'disney2'
-        network: '172.16.2.0/30'
-        numberOfSubnets: '2'
-        state: 'requested'
-
-        subnets:
-          - name: 'd2_sub1'
-            networkType: 'router'
-            CIDR: '192.168.3.0/24'
-            numberOfVM: '1'
-            state: 'requested'
-
-          - name: 'd2_sub2'
-            networkType: 'bridge'
-            CIDR: '192.168.4.0/24'
-            numberOfVM: '1'
-            state: 'requested'
-    
-    VMs:
-      - name: 'disney111'
-        vpc: 'disney1'
-        subnet: '[d1_sub1]'
-        model: 'ubuntu'
-        RAM_size: '2048'
-        CPUs: '2'
-        disk_size: '12'
-        state: 'requested'
-
-      
-      - name: 'disney121'
-        vpc: 'disney1'
-        subnet: '[d1_sub2]'
-        model: 'ubuntu'
-        RAM_size: '2048'
-        CPUs: '2'
-        disk_size: '12'
-        state: 'requested'
-
-      - name: 'disney211'
-        vpc: 'disney2'
-        subnet: '[d2_sub1]'
-        model: 'ubuntu'
-        RAM_size: '2048'
-        CPUs: '2'
-        disk_size: '12'
-        state: 'requested'
-
-      - name: 'disney221'
-        vpc: 'disney2'
-        subnet: '[d2_sub2]'
-        model: 'ubuntu'
-        RAM_size: '2048'
-        CPUs: '2'
-        disk_size: '12'
-        state: 'requested'
-    
-    cdn: 
-      domainName: 'netflix.cdn.com'
-      location: 'NC'
-      originServerIP: '1.1.1.1'
-      originPort: '3060'
-    
+          - name: 'hotstar221'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["h2_sub1", "h2_sub2"]

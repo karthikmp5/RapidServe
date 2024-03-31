@@ -1,0 +1,169 @@
+- name: Deploy Infrastructure with Veth Pairs
+  hosts: localhost
+  gather_facts: no
+  become: true
+
+  vars:
+    vpc_names: []
+    tenant_name: ["netflix"]
+
+  tasks:
+    - name: Retrieve data from etcd
+      command: python3 retrive_etcd.py {{ item }}
+      register: etcd_data
+      loop: "{{ tenant_name }}"
+
+    - name: Parse retrieved data
+      set_fact:
+        etcd_data_parsed: "{{ etcd_data.results[0].stdout.split('\n')[1] | from_yaml }}"
+
+    - name: Get list of existing namespaces
+      command: ip netns list
+      register: existing_namespaces
+      changed_when: false
+
+    - name: Create namespaces for each VPC
+      command: ip netns add {{ item.name }}
+      loop: "{{ etcd_data_parsed | dict2items | map(attribute='value.vpcs') | flatten }}"
+      loop_control:
+        loop_var: item
+      when: "'{{ item.name }}' not in existing_namespaces.stdout"
+
+    - name: Create bridges for each subnet
+      command: "ip link add {{ item.name }}_br type bridge"
+      loop: "{{ etcd_data_parsed | dict2items | map(attribute='value.vpcs') | flatten | map(attribute='subnets') | flatten }}"
+      loop_control:
+        loop_var: item
+
+    - name: Activate bridges for each subnet
+      command: "ip link set {{ item.name }}_br up"
+      loop: "{{ etcd_data_parsed | dict2items | map(attribute='value.vpcs') | flatten | map(attribute='subnets') | flatten }}"
+      loop_control:
+        loop_var: item  
+
+    - name: Create veth pairs for each bridge
+      block:
+        - name: Create veth pair for each subnet
+          command: >
+            ip link add {{ item.subnet.name }}_veth0 type veth peer name {{ item.subnet.name }}_veth1
+          loop: >-
+            {%- set ns_subnets = [] %}
+            {%- for tenant in tenant_name %}
+              {%- for vpc in etcd_data_parsed[tenant].vpcs %}
+                {%- for subnet in vpc.subnets %}
+                  {%- set _ = ns_subnets.append({'vpc_name': vpc.name, 'subnet': subnet}) %}
+                {%- endfor %}
+              {%- endfor %}
+            {%- endfor %}
+            {{- ns_subnets }}
+          loop_control:
+            loop_var: item
+          ignore_errors: true
+
+        - name: Bring up veth0 interface in the root namespace
+          ignore_errors: yes
+          command: ip link set {{ item.subnet.name }}_veth0 up
+          loop: >-
+            {%- set ns_subnets = [] %}
+            {%- for tenant in tenant_name %}
+              {%- for vpc in etcd_data_parsed[tenant].vpcs %}
+                {%- for subnet in vpc.subnets %}
+                  {%- set _ = ns_subnets.append({'vpc_name': vpc.name, 'subnet': subnet}) %}
+                {%- endfor %}
+              {%- endfor %}
+            {%- endfor %}
+            {{- ns_subnets }}
+          loop_control:
+            loop_var: item
+
+        - name: Move one end of the veth pair (veth1) to the corresponding namespace
+          command: ip link set {{ item.subnet.name }}_veth1 netns {{ item.vpc_name }}
+          loop: >-
+            {%- set ns_subnets = [] %}
+            {%- for tenant in tenant_name %}
+              {%- for vpc in etcd_data_parsed[tenant].vpcs %}
+                {%- for subnet in vpc.subnets %}
+                  {%- set _ = ns_subnets.append({'vpc_name': vpc.name, 'subnet': subnet}) %}
+                {%- endfor %}
+              {%- endfor %}
+            {%- endfor %}
+            {{- ns_subnets }}
+          loop_control:
+            loop_var: item
+          ignore_errors: true
+
+        - name: Bring up veth1 interface in its respective namespace
+          ignore_errors: yes
+          command: ip netns exec {{ item.vpc_name }} ip link set {{ item.subnet.name }}_veth1 up
+          loop: >-
+            {%- set ns_subnets = [] %}
+            {%- for tenant in tenant_name %}
+              {%- for vpc in etcd_data_parsed[tenant].vpcs %}
+                {%- for subnet in vpc.subnets %}
+                  {%- set _ = ns_subnets.append({'vpc_name': vpc.name, 'subnet': subnet}) %}
+                {%- endfor %}
+              {%- endfor %}
+            {%- endfor %}
+            {{- ns_subnets }}
+          loop_control:
+            loop_var: item
+
+        - name: Attach veth0 to the bridge in default namespace
+          command: >
+            ip link set {{ item.subnet.name }}_veth0 master {{ item.subnet.name }}_br
+          loop: >-
+            {%- set ns_subnets = [] %}
+            {%- for tenant in tenant_name %}
+              {%- for vpc in etcd_data_parsed[tenant].vpcs %}
+                {%- for subnet in vpc.subnets %}
+                  {%- set _ = ns_subnets.append({'vpc_name': vpc.name, 'subnet': subnet}) %}
+                {%- endfor %}
+              {%- endfor %}
+            {%- endfor %}
+            {{- ns_subnets }}
+          loop_control:
+            loop_var: item
+          ignore_errors: true
+
+        - name: Assign IP addresses to veth1 interfaces within namespaces
+          ignore_errors: yes
+          command: >
+            ip netns exec {{ item.vpc_name }} ip addr add {{ item.subnet.ip }}/24 dev {{ item.subnet.name }}_veth1
+          loop: >-
+            {%- set ns_subnets = [] %}
+            {%- for tenant in tenant_name %}
+              {%- for vpc in etcd_data_parsed[tenant].vpcs %}
+                {%- for subnet in vpc.subnets %}
+                  {%- set _ = ns_subnets.append({'vpc_name': vpc.name, 'subnet': subnet}) %}
+                {%- endfor %}
+              {%- endfor %}
+            {%- endfor %}
+            {{- ns_subnets }}
+          loop_control:
+            loop_var: item
+
+        - name: Setup DHCP on veth1 interfaces within namespaces
+          command: >
+            ip netns exec {{ item.vpc_name }} dnsmasq
+            --interface={{ item.subnet.name }}_veth1
+            --bind-interfaces
+            --dhcp-range={{ item.subnet.dhcp_start }},{{ item.subnet.dhcp_end }},24h
+          loop: >-
+            {%- set ns_subnets = [] %}
+            {%- for tenant in tenant_name %}
+              {%- for vpc in etcd_data_parsed[tenant].vpcs %}
+                {%- for subnet in vpc.subnets %}
+                  {%- set _ = ns_subnets.append({'vpc_name': vpc.name, 'subnet': subnet}) %}
+                {%- endfor %}
+              {%- endfor %}
+            {%- endfor %}
+            {{- ns_subnets }}
+          loop_control:
+            loop_var: item
+
+    - name: Process VPCs for subnetting and interface setup
+      include_tasks: setup_vpc_interfaces.yml
+      loop: "{{ etcd_data_parsed | dict2items | map(attribute='value.vpcs') | flatten }}"
+      loop_control:
+        loop_var: vpc
+

@@ -25,6 +25,11 @@ Running etcd
 # start a local etcd server
 /tmp/etcd-download-test/etcd
 
+# If etcd does not start and the following error is displayed: "etcdmain: listen tcp 127.0.0.1:2380: bind: address already in use":
+# Find the process using the port and kill it 
+sudo lsof -i :2380
+sudo kill -9 <PID>
+
 # write,read to etcd
 /tmp/etcd-download-test/etcdctl --endpoints=localhost:2379 put foo bar
 /tmp/etcd-download-test/etcdctl --endpoints=localhost:2379 get foo

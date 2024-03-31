@@ -9,27 +9,28 @@ tenants:
         subnets:
           - name: 'n1_sub1'
             networkType: 'router'
-            CIDR: '192.168.1.0/25'
+            CIDR: '192.168.1.0/24'
             numberOfVM: '1'
 
-            VMs:
-              - name: 'netflix111'
-                model: 'ubuntu'
-                RAM_size: '2048'
-                CPUs: '2'
-                disk_size: '12G'
-          
           - name: 'n1_sub2'
             networkType: 'bridge'
-            CIDR: '192.168.1.128/25'
+            CIDR: '192.168.2.0/24'
             numberOfVM: '1'
 
-            VMs:
-              - name: 'netflix121'
-                model: 'ubuntu'
-                RAM_size: '2048'
-                CPUs: '2'
-                disk_size: '12G'
+        VMs:
+          - name: 'netflix111'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["n1_sub1"]
+          
+          - name: 'netflix121'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["n1_sub1", "n1_sub2"]
 
       - name: 'netflix2'
         network: '192.168.2.0/24'
@@ -38,27 +39,28 @@ tenants:
         subnets:
           - name: 'n2_sub1'
             networkType: 'router'
-            CIDR: '192.168.1.0/25'
+            CIDR: '192.168.3.0/24'
             numberOfVM: '1'
-
-            VMs:
-              - name: 'netflix211'
-                model: 'ubuntu'
-                RAM_size: '2048'
-                CPUs: '2'
-                disk_size: '12G'
           
           - name: 'n2_sub2'
             networkType: 'bridge'
-            CIDR: '192.168.128.0/25'
-            numberOfVM: '1'
+            CIDR: '192.168.4.0/24'
+            numberOfVM: '1'          
 
-            VMs:
-              - name: 'netflix221'
-                model: 'ubuntu'
-                RAM_size: '2048'
-                CPUs: '2'
-                disk_size: '12G'
+        VMs:
+          - name: 'netflix211'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["n2_sub1"]
+        
+          - name: 'netflix221'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["n2_sub1", "n2_sub2"]
 
 
   - name: 'hotstar' #Org name
@@ -73,25 +75,26 @@ tenants:
             networkType: 'router'
             CIDR: '192.168.1.0/25'
             numberOfVM: '1'
-
-            VMs:
-              - name: 'hotstar111'
-                model: 'ubuntu'
-                RAM_size: '2048'
-                CPUs: '2'
-                disk_size: '12G'
           
           - name: 'h1_sub2'
             networkType: 'bridge'
             CIDR: '192.168.1.128/25'
             numberOfVM: '1'
 
-            VMs:
-              - name: 'hotstar121'
-                model: 'ubuntu'
-                RAM_size: '2048'
-                CPUs: '2'
-                disk_size: '12G'
+        VMs:
+          - name: 'hotstar111'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["h1_sub1"]
+      
+          - name: 'hotstar121'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["h1_sub1", "h1_sub2"]
 
       - name: 'hotstar2'
         network: '192.168.2.0/24'
@@ -103,21 +106,22 @@ tenants:
             CIDR: '192.168.1.0/25'
             numberOfVM: '1'
 
-            VMs:
-              - name: 'hotstar211'
-                model: 'ubuntu'
-                RAM_size: '2048'
-                CPUs: '2'
-                disk_size: '12G'
-          
           - name: 'h2_sub2'
             networkType: 'bridge'
             CIDR: '192.168.128.0/25'
             numberOfVM: '1'
 
-            VMs:
-              - name: 'hotstar221'
-                model: 'ubuntu'
-                RAM_size: '2048'
-                CPUs: '2'
-                disk_size: '12G'
+        VMs:
+          - name: 'hotstar211'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["h2_sub1"]
+
+          - name: 'hotstar221'
+            model: 'ubuntu'
+            RAM_size: '2048'
+            CPUs: '2'
+            disk_size: '12G'
+            subnets: ["h2_sub1", "h2_sub2"]

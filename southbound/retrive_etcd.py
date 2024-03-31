@@ -1,5 +1,6 @@
 import etcd3
 import sys
+import ipaddress
 
 # Create an instance of Etcd3Client
 client = etcd3.client()
@@ -33,7 +34,7 @@ if __name__ == "__main__":
     if data_str:
         # Convert retrieved data string to dictionary
         data = eval(data_str)
-        # print("Retrieved data:")
+        # print("Retrieved data: ", data)
 
         # Iterate through each VPC
         for vpc in data[example_key]['vpcs']:
@@ -41,18 +42,30 @@ if __name__ == "__main__":
             for subnet in vpc['subnets']:
                 cidr = subnet['CIDR']
                 
-                # Extract the first three octets from the CIDR
-                first_three_octets = '.'.join(cidr.split('.')[:3])
-
-                # Construct IP, DHCP start, and DHCP end using the first three octets
-                ip = f"{first_three_octets}.1"
-                dhcp_start = f"{first_three_octets}.2"
-                dhcp_end = f"{first_three_octets}.254"
+                # Extract the network address and prefix length from the CIDR
+                network = ipaddress.ip_network(cidr)
+                ip = str(network.network_address + 1)  # IP is the first address in the CIDR block
+                dhcp_start = str(network.network_address + 2)  # DHCP start is the second address
+                dhcp_end = str(network.broadcast_address - 1)  # DHCP end is the last but one address
 
                 # Add the new fields to the subnet
                 subnet['ip'] = ip
                 subnet['dhcp_start'] = dhcp_start
                 subnet['dhcp_end'] = dhcp_end
+
+
+                # # Extract the first three octets from the CIDR
+                # first_three_octets = '.'.join(cidr.split('.')[:3])
+
+                # # Construct IP, DHCP start, and DHCP end using the first three octets
+                # ip = f"{first_three_octets}.1"
+                # dhcp_start = f"{first_three_octets}.2"
+                # dhcp_end = f"{first_three_octets}.254"
+
+                # # Add the new fields to the subnet
+                # subnet['ip'] = ip
+                # subnet['dhcp_start'] = dhcp_start
+                # subnet['dhcp_end'] = dhcp_end
 
                 # Print the updated subnet information
                 # print(f"CIDR: {cidr}")

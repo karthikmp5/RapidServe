@@ -3,10 +3,6 @@
   gather_facts: no
   become: true
 
-  # vars:
-  #   vpc_names: []
-  #   tenant_name: ["netflix"]
-
   tasks:
     - name: Retrieve data from etcd
       command: python3 retrive_etcd.py {{ item }}

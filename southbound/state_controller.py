@@ -29,7 +29,7 @@ def create_cdn_resources(tenant_name, tenant_data):
     return result
 
 def create_dns_resources(tenant_name, tenant_data):
-    result = run_playbook('deploy_dns.yaml', {'tenant_name': [tenant_name]})
+    result = run_playbook('deploy_dns_final.yaml', {'tenant_name': [tenant_name]})
     return result
 
 def check_and_update_tenant_state(tenant_name, tenant_data):

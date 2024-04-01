@@ -28,6 +28,10 @@ def create_cdn_resources(tenant_name, tenant_data):
     result = run_playbook('deploy_cdn.yaml', {'tenant_name': [tenant_name]})
     return result
 
+def create_dns_resources(tenant_name, tenant_data):
+    result = run_playbook('deploy_dns.yaml', {'tenant_name': [tenant_name]})
+    return result
+
 def check_and_update_tenant_state(tenant_name, tenant_data):
     if  tenant_data[tenant_name]['state'] == 'requested':
         result = create_infra_resources(tenant_name, tenant_data)
@@ -55,6 +59,7 @@ def check_and_update_VM_state(tenant_name, tenant_data):
 def check_and_update_cdn(tenant_name, tenant_data):
     if  tenant_data[tenant_name]['cdn']['state'] == 'requested':
         result = create_cdn_resources(tenant_name, tenant_data)
+        create_dns_resources(tenant_name, tenant_data)
         
         if result.rc == 0:
             tenant_data[tenant_name]['cdn']['state'] = 'active'

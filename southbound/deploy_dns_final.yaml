@@ -189,6 +189,3 @@
         --disk path={{ cloud_init_path }}/{{ vm_name }}-cidata.iso,device=cdrom
         --network bridge={{ bridge_name }},model=virtio
         --os-variant=generic --graphics none --import --noautoconsole
-
-
-

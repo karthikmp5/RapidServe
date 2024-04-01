@@ -127,7 +127,8 @@
       copy:
         dest: "{{ cloud_init_path }}/meta-data"
         content: |
-          instance-id: iid-{{ vm_name }}
+          #cloud-config
+          instance-id: {{ vm_name }}
           local-hostname: {{ vm_name }}
         owner: root
         group: root

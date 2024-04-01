@@ -9,6 +9,8 @@ Dependencies:
   4. sudo apt install python3-ansible-runner
   5. sudo apt install python3-netaddr
   6. sudo apt install dnsmasq
+  7. Upgrade ansible collections: ansible-galaxy collection install ansible.netcommon --upgrade
+
 
 Step 2: run verify_input.py to validate the input given by the tenant
         python3 verify_input.py

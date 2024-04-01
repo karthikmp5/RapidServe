@@ -3,25 +3,30 @@
   gather_facts: no
   become: true
 
-  vars:
-    tenant_name: "netflix"
+  # vars:
+  #   tenant_name: "netflix"
 
   tasks:
     - name: Retrieve data from etcd
-      command: python3 retrive_etcd.py {{ tenant_name }}
+      command: python3 retrive_etcd.py {{ item }}
       register: etcd_data
+      loop: "{{ tenant_name }}"
 
     - name: Parse retrieved data
       set_fact:
-        etcd_data_parsed: "{{ etcd_data.stdout.split('\n')[1] | from_yaml }}"
+        etcd_data_parsed: "{{ etcd_data.results[0].stdout.split('\n')[1] | from_yaml }}"
+   
+    - name: Debug etcd_data_parsed
+      debug:
+        var: etcd_data_parsed
 
-    - name: Calculate VM IP address
-      set_fact:    
-        vm_ip: "{{ (etcd_data_parsed['netflix']['cdn']['cdn_vpcs']['origin_vpc'][0]['CIDR'] | ipaddr('network') | ipmath(2)) }}"
+    - name: Calculate VM IP address with new method
+      set_fact:
+        vm_ip: "{{ (etcd_data_parsed['netflix']['cdn']['cdn_vpcs']['origin_vpc'][0]['CIDR'] | ansible.utils.ipaddr('network') | ansible.utils.ipmath(2)) }}"
 
     - name: Create VMs for each VPC
       vars:
-        vpcs: "{{ etcd_data_parsed[tenant_name].vpcs }}"
+        vpcs: "{{ etcd_data_parsed[tenant_name[0]].vpcs }}"
       block:
         - name: Establish directory structure for VM images
           file:

@@ -19,6 +19,6 @@ Step 3: run the input_parser.py to parse the input yaml file and save the data i
 Step 4: run the state_controller.py to check the state of respective field and deploy the requried resource by running the respective playbook
         python3 state_controller.py <tenant_name>
 
-Step 5: run the implement_dns_final.yaml to install BIND9 and create DNS functionality on the server. Note that the IP address corresponding to the DNS server VM should be provided in the inventory_dns.ini file. 
-        sudo ansible-playbook -i inventory_dns.ini implement_dns_final.yaml -e  "tenant_name=<tenant-name>"
+Step 5: run the implement_dns.yaml to install BIND9 and create DNS functionality on the server. Note that the IP address corresponding to the DNS server VM should be provided in the inventory_dns.ini file. 
+        sudo ansible-playbook -i inventory_dns.ini implement_dns.yaml -e  "tenant_name=<tenant-name>"
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration variables
-VPC_NAME="origin_ns"
+VPC_NAME="origin_vpc"
 BRIDGE_NAME="origin_bridge"
 VM_NAME="origin_server_vm"
 IMAGE_DIR="/var/lib/libvirt/images/$VM_NAME"

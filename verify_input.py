@@ -25,14 +25,6 @@ def verify_parameters(file_path):
                 else:
                     subnet_names.add(subnet['name'])
 
-                # try:
-                #     gateway_ip = ipaddress.IPv4Address(subnet.get('gatewayIP', ''))
-                #     network = ipaddress.IPv4Network(subnet['CIDR'])
-                #     if gateway_ip not in network:
-                #         error_messages.append(f"[E] Invalid gateway IP address for subnet {subnet['name']} in VPC {vpc_name}")
-                # except ValueError:
-                #     error_messages.append(f"[E] Invalid gateway IP address for subnet {subnet['name']} in VPC {vpc_name}")
-
     if error_messages:
         for error in error_messages:
             print(error)

@@ -7,27 +7,22 @@
     bind_zones_path: "{{ bind_conf_path }}/zones"
     python_script_path: "/home/vmadm/RapidServe/southbound/retrive_etcd.py"
     subnets:
-      - 192.168.150.0/24
-      - 192.168.151.0/24
-      - 192.168.152.0/24
-      - 192.168.153.0/24
-      - 192.168.154.0/24
-      - 192.168.155.0/24
+      - 172.16.2.1/32
+      - 192.168.6.2/32
     tenant_abbreviation:
       netflix: "NF"
       hotstar: "HS"
       disney: "D"
     interface_name_mapping:
       netflix:
-        US: "NF_US_veth0"
-        JP: "NF_JP_veth0"
+        US: "NF_US_veth1"
+        JP: "NF_JP_veth1"
       hotstar:
-        US: "HS_US_veth0"
-        JP: "HS_JP_veth0"
+        US: "HS_US_veth1"
+        JP: "HS_JP_veth1"
       disney:
-        US: "D_US_veth0"
-        JP: "D_JP_veth0"
-    # The tenant_name variable will be passed at runtime using -e "tenant_name=<tenant>"
+        US: "D_US_veth1"
+        JP: "D_JP_veth1"
 
   tasks:
     - name: Retrieve CDN configuration for the tenant from etcd
@@ -93,26 +88,26 @@
 
     - name: Fetch IP address for the interface based on location
       shell: >
-        ip -o -4 addr show {{ interface_name_mapping[tenant_name][location] }} | 
+        ip netns exec {{ tenant_abbreviation[tenant_name]_[location]}} ip -o -4 addr show {{ interface_name_mapping[tenant_name][location] }} | 
         awk '{print $4}' | cut -d/ -f1
       register: ns_domain_ip_raw
       loop: "{{ cdn_config[tenant_name]['cdn']['location'] }}"
       loop_control:
         loop_var: location
       changed_when: false
+      delegate_to: localhost
 
-    - name: Template DNS zone file for the location
+    - name: Template DNS zone file for each location
       template:
         src: "db.domain.zone.j2"
-        dest: "{{ bind_zones_path }}/db.{{ cdn_config[tenant_name]['cdn']['domainName'] }}.{{ location.lower() }}"
-      loop: "{{ cdn_config[tenant_name]['cdn']['location'] }}"
+        dest: "{{ bind_zones_path }}/db.{{ cdn_config[tenant_name]['cdn']['domainName'] }}.{{ item.location.lower() }}"
+      loop: "{{ ns_domain_ip_raw.results }}"
+      loop_control:
+        loop_var: item
       vars:
         domain_name: "{{ cdn_config[tenant_name]['cdn']['domainName'] }}"
-        origin_vpc_public_subnet_ip: "192.168.150.1"
-        ns_domain_ip: "{{ ns_domain_ip_raw.results | map(attribute='stdout') | list }}"
-      loop_control:
-        loop_var: location
-
+        origin_vpc_public_subnet_ip: "{{ cdn_config[tenant_name]['cdn']['cdn_vpcs']['origin_vpc'][0]['CIDR'] | ipaddr('network') | ipmath(2)) }}"
+        ns_domain_ip: "{{ item.stdout }}"
 
     - name: Restart BIND9 to apply changes
       service:

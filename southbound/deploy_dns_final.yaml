@@ -136,7 +136,8 @@
       copy:
         dest: "{{ cloud_init_path }}/meta-data"
         content: |
-          instance-id: iid-{{ vm_name }}
+          #cloud-config
+          instance-id: {{ vm_name }}
           local-hostname: {{ vm_name }}
         owner: root
         group: root
@@ -188,4 +189,6 @@
         --disk path={{ cloud_init_path }}/{{ vm_name }}-cidata.iso,device=cdrom
         --network bridge={{ bridge_name }},model=virtio
         --os-variant=generic --graphics none --import --noautoconsole
+
+
 

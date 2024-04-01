@@ -3,9 +3,9 @@
   gather_facts: no
   become: true
 
-  vars:
-    vpc_names: []
-    tenant_name: ["netflix"]
+  # vars:
+  #   vpc_names: []
+  #   tenant_name: ["netflix"]
 
   tasks:
     - name: Retrieve data from etcd
@@ -166,4 +166,3 @@
       loop: "{{ etcd_data_parsed | dict2items | map(attribute='value.vpcs') | flatten }}"
       loop_control:
         loop_var: vpc
-

@@ -4,25 +4,44 @@
   become: true
 
   vars:
-    vpc_name: "origin_ns"
+    # tenant_name: ["netflix"]
+
     bridge_name: "origin_bridge"
     vm_name: "origin_server_vm"
-    base_image_path: "/var/lib/libvirt/images/base-vm-image.qcow2"  # Ensure the correct path
+    base_image_path: "/var/lib/libvirt/images/base-vm-image.qcow2"  
     vm_disk_size: "12G"
     cloud_init_path: "/var/lib/libvirt/images/{{ vm_name }}"
 
     # Networking
     veth_ns_to_root: "origin_ns"
     veth_root_to_ns: "origin_root"
-    root_ip: "10.10.1.2/30"
-    ns_ip: "10.10.1.1/30"
-    bridge_subnet: "10.10.20.0/24"
-    bridge_gateway_ip: "10.10.20.1"
     veth_ns_to_bridge: "origin_nsbridge"
     veth_bridge_to_ns: "origin_bridgens"
-    ns_bridge_ip: "10.10.20.2/24"
 
   tasks:
+    - name: Retrieve data from etcd
+      command: python3 retrive_etcd.py {{ item }}
+      register: etcd_data
+      loop: "{{ tenant_name }}"
+
+    - name: Parse retrieved data
+      set_fact:
+        etcd_data_parsed: "{{ etcd_data.results[0].stdout.split('\n')[1] | from_yaml }}"
+
+    - name: Extract CDN VPC configurations
+      set_fact:
+        origin_vpc: "{{ etcd_data_parsed['netflix']['cdn']['cdn_vpcs']['origin_vpc'][0] }}"
+        dns_vpc: "{{ etcd_data_parsed['netflix']['cdn']['cdn_vpcs']['dns_vpc'][0] }}"
+        bridge_subnet: "{{ etcd_data_parsed['netflix']['cdn']['cdn_vpcs']['origin_vpc'][0]['CIDR'] }}"
+
+    - name: Calculate IP addresses
+      set_fact:
+        root_ip: "{{ origin_vpc['public_subnet'] | ipaddr('network') | ipmath(1) }}/30"
+        ns_ip: "{{ origin_vpc['public_subnet'] | ipaddr('broadcast') | ipmath(-1) }}/30"
+        ns_bridge_ip: "{{ origin_vpc['CIDR'] | ipaddr('network') | ipmath(1) }}/30"
+        vm_ip: "{{ origin_vpc['CIDR'] | ipaddr('network') | ipmath(2) }}"
+        vpc_name: "{{ origin_vpc.name }}"
+
     - name: Create network namespace
       command: ip netns add {{ vpc_name }}
 
@@ -73,7 +92,7 @@
         ip netns exec {{ vpc_name }} dnsmasq
         --interface={{ veth_ns_to_bridge }}
         --bind-interfaces
-        --dhcp-range=10.10.20.5,10.10.20.254,24h
+        --dhcp-range={{vm_ip}},{{vm_ip}},24h
     
     - name: Activate loopback interface in the network namespace
       command: ip netns exec {{ vpc_name }} ip link set lo up
@@ -140,6 +159,23 @@
                 dhcp4: true
           packages:
             - nginx
+            - traceroute
+          write_files:
+            - content: |
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>New Page</title>
+                </head>
+                <body>
+                    <h1>This is my new HTML page for tenant {{tenant_name}}!</h1>
+                </body>
+                </html>
+              path: /var/www/html/index.html
+              owner: root:root
+              permissions: '0644'
           runcmd:
             - "for i in /sys/class/net/*; do intf=$(basename $i); [ \"$intf\" != \"lo\" ] && ip link set $intf up and dhclient $intf; done"
             - systemctl enable nginx

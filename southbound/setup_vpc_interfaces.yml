@@ -28,6 +28,7 @@
   command: "ip netns exec {{ vpc.name }} ip link set {{ vpc.name }}_veth1 up"
 
 - name: Add route in root namespace to reach VPC subnet via vpc_veth1 IP
+  ignore_errors: true
   command: >
     ip route add {{ item.CIDR }} via {{ subnet_output.stdout | ipaddr('network') | ipmath(2) }}
   loop: "{{ vpc.subnets }}"

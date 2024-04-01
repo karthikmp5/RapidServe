@@ -3,6 +3,8 @@ CDNaaS
 
 setup the etcd db
 
+run verify_input.py
+
 run the input_parser.py
 
 run the state_controller.py <tenant_name>

@@ -195,9 +195,11 @@
         
     - name: Initialize VM connected to the bridge
       command: >
-        virt-install --virt-type=kvm --name={{ vm_name }} --ram=2048 --vcpus=2
+        virt-install --virt-type=kvm --name={{ vm_name }} --ram=2048 --vcpus=1
         --disk path={{ cloud_init_path }}/{{ vm_name }}.qcow2,format=qcow2
         --disk path={{ cloud_init_path }}/{{ vm_name }}-cidata.iso,device=cdrom
         --network bridge={{ bridge_name }},model=virtio
         --os-variant=generic --graphics none --import --noautoconsole
+
+
 

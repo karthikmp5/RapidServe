@@ -88,7 +88,7 @@
 
     - name: Fetch IP address for the interface based on location
       shell: >
-        ip netns exec {{ tenant_abbreviation[tenant_name]_[location]}} ip -o -4 addr show {{ interface_name_mapping[tenant_name][location] }} | 
+        ip netns exec {{tenant_abbreviation[tenant_name]}}_{{location}} ip -o -4 addr show {{ interface_name_mapping[tenant_name][location] }} | 
         awk '{print $4}' | cut -d/ -f1
       register: ns_domain_ip_raw
       loop: "{{ cdn_config[tenant_name]['cdn']['location'] }}"
@@ -106,7 +106,7 @@
         loop_var: item
       vars:
         domain_name: "{{ cdn_config[tenant_name]['cdn']['domainName'] }}"
-        origin_vpc_public_subnet_ip: "{{ cdn_config[tenant_name]['cdn']['cdn_vpcs']['origin_vpc'][0]['CIDR'] | ipaddr('network') | ipmath(2)) }}"
+        origin_vpc_public_subnet_ip: "{{ cdn_config[tenant_name]['cdn']['cdn_vpcs']['origin_vpc'][0]['CIDR'] | ipaddr('network') | ipmath(2) }}"
         ns_domain_ip: "{{ item.stdout }}"
 
     - name: Restart BIND9 to apply changes

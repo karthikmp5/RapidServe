@@ -57,8 +57,9 @@
 
     - name: Randomly select a subnet for each location
       set_fact:
-        subnet_{{ item }}: "{{ subnets | random }}"
+        subnet_{{ item }}: "{{ subnets.pop(subnets | random) }}"
       loop: "{{ cdn_config[tenant_name]['cdn']['location'] }}"
+
 
     - name: Comment out named.conf.default-zones include in named.conf
       lineinfile:

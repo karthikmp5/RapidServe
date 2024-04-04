@@ -7,8 +7,8 @@
     bind_zones_path: "{{ bind_conf_path }}/zones"
     python_script_path: "/home/vmadm/RapidServe/southbound/retrive_etcd.py"
     subnets:
+      - 172.16.1.0/24
       - 172.16.2.0/24
-      - 172.16.2.1/32
     tenant_abbreviation:
       netflix: "NF"
       hotstar: "HS"
@@ -55,11 +55,9 @@
         state: directory
         mode: '0755'
 
-    - name: Randomly select a subnet for each location
+    - name: Assign subnets sequentially to each location
       set_fact:
-        subnet_{{ item }}: "{{ subnets.pop(subnets | random) }}"
-      loop: "{{ cdn_config[tenant_name]['cdn']['location'] }}"
-
+        subnet_mapping: "{{ dict(cdn_config[tenant_name]['cdn']['location'] | zip(subnets)) }}"
 
     - name: Comment out named.conf.default-zones include in named.conf
       lineinfile:
@@ -74,7 +72,7 @@
         block: |
           {% for location in cdn_config[tenant_name]['cdn']['location'] %}
           acl "{{ location.lower() }}-users" {
-              {{ vars['subnet_' ~ location] }};
+              {{ subnet_mapping[location] }};
           };
           view "{{ location }}" {
               match-clients { {{ location.lower() }}-users; };
@@ -89,7 +87,7 @@
 
     - name: Fetch IP address for the interface based on location
       shell: >
-        ip netns exec {{tenant_abbreviation[tenant_name]}}_{{location}} ip -o -4 addr show {{ interface_name_mapping[tenant_name][location] }} | 
+        ip netns exec {{tenant_abbreviation[tenant_name]}}_{{location}} ip -o -4 addr show {{tenant_abbreviation[tenant_name]}}_{{location}}_veth1 | 
         awk '{print $4}' | cut -d/ -f1
       register: ns_domain_ip_raw
       loop: "{{ cdn_config[tenant_name]['cdn']['location'] }}"

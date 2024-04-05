@@ -4,7 +4,7 @@
   become: true
 
   vars:
-    tenant_name: ["netflix"]
+    # tenant_name: ["netflix"]
 
     bridge_name: "dns_bridge"
     vm_name: "dns_server_vm"
@@ -29,9 +29,9 @@
 
     - name: Extract CDN VPC configurations
       set_fact:
-        origin_vpc: "{{ etcd_data_parsed['netflix']['cdn']['cdn_vpcs']['origin_vpc'][0] }}"
-        dns_vpc: "{{ etcd_data_parsed['netflix']['cdn']['cdn_vpcs']['dns_vpc'][0] }}"
-        bridge_subnet: "{{ etcd_data_parsed['netflix']['cdn']['cdn_vpcs']['dns_vpc'][0]['CIDR'] }}"
+        origin_vpc: "{{ etcd_data_parsed[tenant_name[0]]['cdn']['cdn_vpcs']['origin_vpc'][0] }}"
+        dns_vpc: "{{ etcd_data_parsed[tenant_name[0]]['cdn']['cdn_vpcs']['dns_vpc'][0] }}"
+        bridge_subnet: "{{ etcd_data_parsed[tenant_name[0]]['cdn']['cdn_vpcs']['dns_vpc'][0]['CIDR'] }}"
 
     - name: Calculate IP addresses
       set_fact:

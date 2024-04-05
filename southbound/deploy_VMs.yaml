@@ -22,7 +22,11 @@
 
     - name: Calculate VM IP address with new method
       set_fact:
-        vm_ip: "{{ (etcd_data_parsed['netflix']['cdn']['cdn_vpcs']['origin_vpc'][0]['CIDR'] | ansible.utils.ipaddr('network') | ansible.utils.ipmath(2)) }}"
+        vm_ip: "{{ (etcd_data_parsed[tenant_name[0]]['cdn']['cdn_vpcs']['origin_vpc'][0]['CIDR'] | ansible.utils.ipaddr('network') | ansible.utils.ipmath(2)) }}"
+
+    - name: Debug calculate IP
+      debug:
+        var: vm_ip
 
     - name: Create VMs for each VPC
       vars:

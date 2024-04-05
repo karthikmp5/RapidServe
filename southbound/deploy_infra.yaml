@@ -13,17 +13,17 @@
       set_fact:
         etcd_data_parsed: "{{ etcd_data.results[0].stdout.split('\n')[1] | from_yaml }}"
 
-    - name: Get list of existing namespaces
-      command: ip netns list
-      register: existing_namespaces
-      changed_when: false
+    # - name: Get list of existing namespaces
+    #   command: ip netns list
+    #   register: existing_namespaces
+    #   changed_when: false
 
     - name: Create namespaces for each VPC
       command: ip netns add {{ item.name }}
       loop: "{{ etcd_data_parsed | dict2items | map(attribute='value.vpcs') | flatten }}"
       loop_control:
         loop_var: item
-      when: "'{{ item.name }}' not in existing_namespaces.stdout"
+      # when: "'{{ item.name }}' not in existing_namespaces.stdout"
 
     - name: Create bridges for each subnet
       command: "ip link add {{ item.name }}_br type bridge"

@@ -22,11 +22,7 @@
 
     - name: Calculate VM IP address with new method
       set_fact:
-        vm_ip: "{{ (etcd_data_parsed[tenant_name[0]]['cdn']['cdn_vpcs']['origin_vpc'][0]['CIDR'] | ansible.utils.ipaddr('network') | ansible.utils.ipmath(2)) }}"
-
-    - name: Debug calculate IP
-      debug:
-        var: vm_ip
+        vm_ip: "{{ (etcd_data_parsed['netflix']['cdn']['cdn_vpcs']['origin_vpc'][0]['CIDR'] | ansible.utils.ipaddr('network') | ansible.utils.ipmath(2)) }}"
 
     - name: Create VMs for each VPC
       vars:
@@ -93,7 +89,7 @@
                                 proxy_cache my_cache;
                                 proxy_pass http://{{vm_ip}};
                                 proxy_set_header Host $host;
-                                proxy_cache_valid 200 302 20s;
+                                proxy_cache_valid 200 302 60s;
                                 proxy_cache_valid 404 1m;
                                 add_header X-Cache-Status $upstream_cache_status;
                             }
@@ -131,4 +127,3 @@
             --import {% for subnet in item.subnets %} --network bridge={{ subnet }}_br,model=virtio {% endfor %}
             --noautoconsole
           loop: "{{ vpcs | map(attribute='VMs') | flatten }}"
-

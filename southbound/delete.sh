@@ -23,4 +23,3 @@ sudo ip netns delete NF_JP
 # Deleting additional veth interfaces
 sudo ip link delete NF_US_veth0
 sudo ip link delete NF_JP_veth0
-

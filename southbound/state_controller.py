@@ -59,11 +59,15 @@ def check_and_update_VM_state(tenant_name, tenant_data):
 def check_and_update_cdn(tenant_name, tenant_data):
     if  tenant_data[tenant_name]['cdn']['state'] == 'requested':
         result = create_cdn_resources(tenant_name, tenant_data)
-        create_dns_resources(tenant_name, tenant_data)
         
         if result.rc == 0:
-            tenant_data[tenant_name]['cdn']['state'] = 'active'
-            client.put(tenant_name, str(tenant_data))
+            result = create_dns_resources(tenant_name, tenant_data)
+            if result.rc == 0:
+                tenant_data[tenant_name]['cdn']['state'] = 'active'
+                client.put(tenant_name, str(tenant_data))
+            else:
+                print("Error occurred while creating dns resources.")
+                sys.exit(1)
         else:
             print("Error occurred while creating cdn resources.")
             sys.exit(1)

@@ -27,13 +27,13 @@
 - name: Activate veth1 in corresponding namespace
   command: "ip netns exec {{ vpc.name }} ip link set {{ vpc.name }}_veth1 up"
 
-- name: Add route in root namespace to reach VPC subnet via vpc_veth1 IP
-  ignore_errors: true
-  command: >
-    ip route add {{ item.CIDR }} via {{ subnet_output.stdout | ipaddr('network') | ipmath(2) }}
-  loop: "{{ vpc.subnets }}"
-  loop_control:
-    loop_var: item
+# - name: Add route in root namespace to reach VPC subnet via vpc_veth1 IP
+#   ignore_errors: true
+#   command: >
+#     ip route add {{ item.CIDR }} via {{ subnet_output.stdout | ipaddr('network') | ipmath(2) }}
+#   loop: "{{ vpc.subnets }}"
+#   loop_control:
+#     loop_var: item
 
 - name: Activate loopback interface in the network namespace
   command: ip netns exec {{ vpc.name }} ip link set lo up
@@ -46,15 +46,15 @@
 - name: Set up NAT for the VPC's external interface
   command: ip netns exec {{ vpc.name }} iptables -t nat -A POSTROUTING -o {{ vpc.name }}_veth1 -j MASQUERADE
 
-- name: Set up forwarding rules for each subnet interface within the VPC
-  command: ip netns exec {{ vpc.name }} iptables -A FORWARD -i {{ vpc.name }}_veth1 -o {{ item.name }}_veth1 -m state --state RELATED,ESTABLISHED -j ACCEPT
-  loop: "{{ vpc.subnets }}"
-  loop_control:
-    loop_var: item
+# - name: Set up forwarding rules for each subnet interface within the VPC
+#   command: ip netns exec {{ vpc.name }} iptables -A FORWARD -i {{ vpc.name }}_veth1 -o {{ item.name }}_veth1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+#   loop: "{{ vpc.subnets }}"
+#   loop_control:
+#     loop_var: item
 
-- name: Set up forwarding rules for traffic from subnet interfaces to the VPC's external interface
-  command: ip netns exec {{ vpc.name }} iptables -A FORWARD -i {{ item.name }}_veth1 -o {{ vpc.name }}_veth1 -j ACCEPT
-  loop: "{{ vpc.subnets }}"
-  loop_control:
-    loop_var: item
+# - name: Set up forwarding rules for traffic from subnet interfaces to the VPC's external interface
+#   command: ip netns exec {{ vpc.name }} iptables -A FORWARD -i {{ item.name }}_veth1 -o {{ vpc.name }}_veth1 -j ACCEPT
+#   loop: "{{ vpc.subnets }}"
+#   loop_control:
+#     loop_var: item
 

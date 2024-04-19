@@ -7,15 +7,18 @@
     service_port: 80  # Define the service port for load balancing
 
   tasks:
-    - name: Retrieve data from etcd for each tenant
-      command: python3 retrive_etcd.py {{ item }}
-      register: etcd_data
-      loop: "{{ [tenant_name] }}"
+    # - name: Retrieve data from etcd
+    #   command: python3 retrive_etcd.py {{ item }}
+    #   register: tenant_data
+    #   loop: "{{ tenant_name }}"
 
-
-    - name: Parse retrieved data to get the VPC information
+    - name: Parse retrieved data
       set_fact:
-        etcd_data_parsed: "{{ etcd_data.results[0].stdout.split('\n')[1] | from_yaml }}"
+        etcd_data_parsed: "{{ tenant_data | from_yaml }}" #.results[0].stdout.split('\n')[1]
+   
+    - name: Debug etcd_data_parsed
+      debug:
+        var: etcd_data_parsed
 
     - name: Extract list of VPCs
       set_fact:

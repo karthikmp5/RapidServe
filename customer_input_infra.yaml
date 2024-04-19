@@ -6,55 +6,72 @@ tenants:
     vpcs:
       - name: 'NF_US'
         numberOfSubnets: '2'
-        VMs_state: 'requested' 
-
-        subnets:
-          - name: 'NF_US_S1'
-            CIDR: '192.168.1.0/30'
-
-          - name: 'NF_US_S2'
-            CIDR: '192.168.2.0/24'
-        
-        VMs:
-          - name: 'NF_US_VM1'
-            subnets: ['NF_US_S1']
-            model: 'ubuntu'
-            RAM_size: '2048'
-            CPUs: '2'
-            disk_size: '12G'
-        
-          - name: 'NF_US_VM2'
-            subnets: ['NF_US_S2']
-            model: 'ubuntu'
-            RAM_size: '2048'
-            CPUs: '2'
-            disk_size: '12G'
+        vpc_state: 'requested' 
 
       - name: 'NF_JP'
         numberOfSubnets: '2'
-        VMs_state: 'requested'
+        vpc_state: 'requested'
 
-        subnets:
-          - name: 'NF_JP_S1'
-            CIDR: '192.168.3.0/24'
+    subnets:
+      - name: 'NF_US_S1'
+        CIDR: '192.168.1.0/30'
+        vpc: 'NF_US'
+        subnet_state: 'requested'
 
-          - name: 'NF_JP_S2'
-            CIDR: '192.168.4.0/24'
+      - name: 'NF_US_S2'
+        CIDR: '192.168.2.0/24'
+        vpc: 'NF_US'
+        subnet_state: 'requested'
 
-        VMs:
-          - name: 'NF_JP_VM1'
-            subnets: ['NF_JP_S1']
-            model: 'ubuntu'
-            RAM_size: '2048'
-            CPUs: '2'
-            disk_size: '12G'
+      - name: 'NF_JP_S1'
+        CIDR: '192.168.3.0/24'
+        vpc: 'NF_JP'
+        subnet_state: 'requested'
 
-          - name: 'NF_JP_VM2'
-            subnets: ['NF_JP_S2']
-            model: 'ubuntu'
-            RAM_size: '2048'
-            CPUs: '2'
-            disk_size: '12G'
+      - name: 'NF_JP_S2'
+        CIDR: '192.168.4.0/24'
+        vpc: 'NF_JP'
+        subnet_state: 'requested'
+        
+    containers:
+      - number: '1'
+        vpc: 'NF_US'
+        origin_VM_IP: '192.168.5.2'
+        subnets: ['NF_US_S1']
+        container_state: 'requested'
+    
+    VMs:
+      - name: 'NF_US_VM1'
+        VM_state: 'requested'
+        subnets: ['NF_US_S1']
+        model: 'ubuntu'
+        RAM_size: '2048'
+        CPUs: '2'
+        disk_size: '12G'
+    
+      - name: 'NF_US_VM2'
+        VM_state: 'requested'
+        subnets: ['NF_US_S2']
+        model: 'ubuntu'
+        RAM_size: '2048'
+        CPUs: '2'
+        disk_size: '12G'
+
+      - name: 'NF_JP_VM1'
+        VM_state: 'requested'
+        subnets: ['NF_JP_S1']
+        model: 'ubuntu'
+        RAM_size: '2048'
+        CPUs: '2'
+        disk_size: '12G'
+
+      - name: 'NF_JP_VM2'
+        VM_state: 'requested'
+        subnets: ['NF_JP_S2']
+        model: 'ubuntu'
+        RAM_size: '2048'
+        CPUs: '2'
+        disk_size: '12G'
 
     cdn: 
       state: 'requested'
@@ -71,149 +88,173 @@ tenants:
             public_subnet: 172.16.2.0/30 
   
 
-  - name: 'hotstar' #Org name
-    numberOfVpcs: '2'
-    state: 'requested'
+  # - name: 'hotstar' #Org name
+  #   numberOfVpcs: '2'
+  #   state: 'requested'
 
-    cdn: 
-      state: 'requested'
-      domainName: 'hotstar.cdn.com'
-      location: ['UK', 'CN']
-      cdn_vpcs:
-        origin_vpc:
-          - name: origin_vpc
-            CIDR: 192.169.7.0/24
-            public_subnet: 172.16.3.0/30
-        dns_vpc:
-          - name: dns_vpc
-            CIDR: 192.169.8.0/24
-            public_subnet: 172.16.4.0/30  
+  #   cdn: 
+  #     state: 'requested'
+  #     domainName: 'hotstar.cdn.com'
+  #     location: ['UK', 'CN']
+  #     cdn_vpcs:
+  #       origin_vpc:
+  #         - name: origin_vpc
+  #           CIDR: 192.169.7.0/24
+  #           public_subnet: 172.16.3.0/30
+  #       dns_vpc:
+  #         - name: dns_vpc
+  #           CIDR: 192.169.8.0/24
+  #           public_subnet: 172.16.4.0/30  
 
-    vpcs:
-      - name: 'HS_UK'
-        numberOfSubnets: '2'
-        VMs_state: 'requested'
+  #   vpcs:
+  #     - name: 'HS_UK'
+  #       numberOfSubnets: '2'
+  #       VMs_state: 'requested'
 
-        subnets:
-          - name: 'HS_UK_S1'
-            CIDR: '192.169.1.0/30'
+  #       subnets:
+  #         - name: 'HS_UK_S1'
+  #           CIDR: '192.169.1.0/30'
 
-          - name: 'HS_UK_S2'
-            CIDR: '192.169.2.0/24'
+  #         - name: 'HS_UK_S2'
+  #           CIDR: '192.169.2.0/24'
         
-        VMs:
-          - name: 'HS_UK_VM1'
-            subnets: ['HS_UK_S1']
-            model: 'ubuntu'
-            RAM_size: '2048'
-            CPUs: '2'
-            disk_size: '12G'
+  #       VMs:
+  #         - name: 'HS_UK_VM1'
+  #           VM_state: 'active'
+  #           subnets: ['HS_UK_S1']
+  #           model: 'ubuntu'
+  #           RAM_size: '2048'
+  #           CPUs: '2'
+  #           disk_size: '12G'
         
-          - name: 'HS_UK_VM2'
-            subnets: ['HS_UK_S2']
-            model: 'ubuntu'
-            RAM_size: '2048'
-            CPUs: '2'
-            disk_size: '12G'
+  #         - name: 'HS_UK_VM2'
+  #           VM_state: 'active'
+  #           subnets: ['HS_UK_S2']
+  #           model: 'ubuntu'
+  #           RAM_size: '2048'
+  #           CPUs: '2'
+  #           disk_size: '12G'
 
-      - name: 'HS_CN'
-        numberOfSubnets: '2'
-        VMs_state: 'requested'
+  #     - name: 'HS_CN'
+  #       numberOfSubnets: '2'
+  #       VMs_state: 'requested'
 
-        subnets:
-          - name: 'HS_CN_S1'
-            CIDR: '192.169.3.0/24'
-            state: 'requested'
+  #       subnets:
+  #         - name: 'HS_CN_S1'
+  #           CIDR: '192.169.3.0/24'
+  #           state: 'requested'
 
-          - name: 'HS_CN_S2'
-            CIDR: '192.169.4.0/24'
-            state: 'requested'
+  #         - name: 'HS_CN_S2'
+  #           CIDR: '192.169.4.0/24'
+  #           state: 'requested'
 
-        VMs:
-          - name: 'HS_CN_VM1'
-            subnets: ['HS_CN_S1']
-            model: 'ubuntu'
-            RAM_size: '2048'
-            CPUs: '2'
-            disk_size: '12G'
+  #       VMs:
+  #         - name: 'HS_CN_VM1'
+  #           VM_state: 'requested'
+  #           subnets: ['HS_CN_S1']
+  #           model: 'ubuntu'
+  #           RAM_size: '2048'
+  #           CPUs: '2'
+  #           disk_size: '12G'
 
-          - name: 'HS_CN_VM2'
-            subnets: ['HS_CN_S2']
-            model: 'ubuntu'
-            RAM_size: '2048'
-            CPUs: '2'
-            disk_size: '12G'
+  #         - name: 'HS_CN_VM2'
+  #           VM_state: 'requested'
+  #           subnets: ['HS_CN_S2']
+  #           model: 'ubuntu'
+  #           RAM_size: '2048'
+  #           CPUs: '2'
+  #           disk_size: '12G'
+
+  #         - name: 'HS_CN_VM3'
+  #           VM_state: 'requested'
+  #           subnets: ['HS_CN_S2']
+  #           model: 'ubuntu'
+  #           RAM_size: '2048'
+  #           CPUs: '2'
+  #           disk_size: '12G'
+
+  #         - name: 'HS_CN_VM4'
+  #           VM_state: 'requested'
+  #           subnets: ['HS_CN_S2']
+  #           model: 'ubuntu'
+  #           RAM_size: '2048'
+  #           CPUs: '2'
+  #           disk_size: '12G'
 
 
-  - name: 'disney' #Org name
-    numberOfVpcs: '2'
-    state: 'requested'
+  # - name: 'disney' #Org name
+  #   numberOfVpcs: '2'
+  #   state: 'requested'
 
-    cdn: 
-      state: 'requested'
-      domainName: 'disney.cdn.com'
-      location: ['UK', 'US']
-      cdn_vpcs:
-        origin_vpc:
-          - name: origin_vpc
-            CIDR: 192.170.7.0/24
-            public_subnet: 172.16.5.0/30
-        dns_vpc:
-          - name: dns_vpc
-            CIDR: 192.170.8.0/24
-            public_subnet: 172.16.6.0/30  
+  #   cdn: 
+  #     state: 'requested'
+  #     domainName: 'disney.cdn.com'
+  #     location: ['UK', 'US']
+  #     cdn_vpcs:
+  #       origin_vpc:
+  #         - name: origin_vpc
+  #           CIDR: 192.170.7.0/24
+  #           public_subnet: 172.16.5.0/30
+  #       dns_vpc:
+  #         - name: dns_vpc
+  #           CIDR: 192.170.8.0/24
+  #           public_subnet: 172.16.6.0/30  
 
-    vpcs:
-      - name: 'D_UK'
-        numberOfSubnets: '2'
-        VMs_state: 'requested'
+  #   vpcs:
+  #     - name: 'D_UK'
+  #       numberOfSubnets: '2'
+  #       VMs_state: 'requested'
 
-        subnets:
-          - name: 'D_UK_S1'
-            CIDR: '192.169.1.0/30'
+  #       subnets:
+  #         - name: 'D_UK_S1'
+  #           CIDR: '192.169.1.0/30'
 
-          - name: 'D_UK_S2'
-            CIDR: '192.169.2.0/24'
+  #         - name: 'D_UK_S2'
+  #           CIDR: '192.169.2.0/24'
         
-        VMs:
-          - name: 'D_UK_VM1'
-            subnets: ['D_UK_S1']
-            model: 'ubuntu'
-            RAM_size: '2048'
-            CPUs: '2'
-            disk_size: '12G'
+  #       VMs:
+  #         - name: 'D_UK_VM1'
+  #           VM_state: 'requested'
+  #           subnets: ['D_UK_S1']
+  #           model: 'ubuntu'
+  #           RAM_size: '2048'
+  #           CPUs: '2'
+  #           disk_size: '12G'
         
-          - name: 'D_UK_VM2'
-            subnets: ['D_UK_S2']
-            model: 'ubuntu'
-            RAM_size: '2048'
-            CPUs: '2'
-            disk_size: '12G'
+  #         - name: 'D_UK_VM2'
+  #           VM_state: 'requested'
+  #           subnets: ['D_UK_S2']
+  #           model: 'ubuntu'
+  #           RAM_size: '2048'
+  #           CPUs: '2'
+  #           disk_size: '12G'
 
-      - name: 'D_US'
-        numberOfSubnets: '2'
-        VMs_state: 'requested'
+  #     - name: 'D_US'
+  #       numberOfSubnets: '2'
+  #       VMs_state: 'requested'
 
-        subnets:
-          - name: 'D_US_S1'
-            CIDR: '192.169.3.0/24'
-            state: 'requested'
+  #       subnets:
+  #         - name: 'D_US_S1'
+  #           CIDR: '192.169.3.0/24'
+  #           state: 'requested'
 
-          - name: 'D_US_S2'
-            CIDR: '192.169.4.0/24'
-            state: 'requested'
+  #         - name: 'D_US_S2'
+  #           CIDR: '192.169.4.0/24'
+  #           state: 'requested'
 
-        VMs:
-          - name: 'D_US_VM1'
-            subnets: ['D_US_S1']
-            model: 'ubuntu'
-            RAM_size: '2048'
-            CPUs: '2'
-            disk_size: '12G'
+  #       VMs:
+  #         - name: 'D_US_VM1'
+  #           VM_state: 'requested'
+  #           subnets: ['D_US_S1']
+  #           model: 'ubuntu'
+  #           RAM_size: '2048'
+  #           CPUs: '2'
+  #           disk_size: '12G'
 
-          - name: 'D_US_VM2'
-            subnets: ['D_US_S2']
-            model: 'ubuntu'
-            RAM_size: '2048'
-            CPUs: '2'
-            disk_size: '12G'
+  #         - name: 'D_US_VM2'
+  #           VM_state: 'requested'
+  #           subnets: ['D_US_S2']
+  #           model: 'ubuntu'
+  #           RAM_size: '2048'
+  #           CPUs: '2'
+  #           disk_size: '12G'

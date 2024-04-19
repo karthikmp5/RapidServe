@@ -19,14 +19,18 @@
     veth_bridge_to_ns: "origin_bridgens"
 
   tasks:
-    - name: Retrieve data from etcd
-      command: python3 retrive_etcd.py {{ item }}
-      register: etcd_data
-      loop: "{{ tenant_name }}"
+    # - name: Retrieve data from etcd
+    #   command: python3 retrive_etcd.py {{ item }}
+    #   register: tenant_data
+    #   loop: "{{ tenant_name }}"
 
     - name: Parse retrieved data
       set_fact:
-        etcd_data_parsed: "{{ etcd_data.results[0].stdout.split('\n')[1] | from_yaml }}"
+        etcd_data_parsed: "{{ tenant_data | from_yaml }}" #.results[0].stdout.split('\n')[1]
+   
+    - name: Debug etcd_data_parsed
+      debug:
+        var: etcd_data_parsed
 
     - name: Extract CDN VPC configurations
       set_fact:

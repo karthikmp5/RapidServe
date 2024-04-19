@@ -25,18 +25,37 @@
         JP: "D_JP_veth1"
 
   tasks:
-    - name: Retrieve CDN configuration for the tenant from etcd
-      command: "python3 {{ python_script_path }} {{ tenant_name }}"
-      register: tenant_cdn_config_raw
-      delegate_to: localhost
 
-    - name: Extract YAML data from script output
-      set_fact:
-        tenant_cdn_config: "{{ tenant_cdn_config_raw.stdout.split('Updated data:\n')[1] }}"
+    # - name: Retrieve data from etcd
+    #   command: python3 retrive_etcd.py {{ item }}
+    #   register: tenant_data
+    #   loop: "{{ tenant_name }}"
+
+    # - name: Parse retrieved data
+    #   set_fact:
+    #     etcd_data_parsed: "{{ tenant_data | from_yaml }}" #.results[0].stdout.split('\n')[1]
+   
+    # - name: Debug etcd_data_parsed
+    #   debug:
+    #     var: etcd_data_parsed
+
+
+    # - name: Retrieve CDN configuration for the tenant from etcd
+    #   command: "python3 {{ python_script_path }} {{ tenant_name }}"
+    #   register: tenant_cdn_config_raw
+    #   delegate_to: localhost
+
+    # - name: Extract YAML data from script output
+    #   set_fact:
+    #     tenant_cdn_config: "{{ tenant_cdn_config_raw.stdout.split('Updated data:\n')[1] }}"
 
     - name: Parse the CDN configuration
       set_fact:
-        cdn_config: "{{ tenant_cdn_config | from_yaml }}"
+        cdn_config: "{{ tenant_data | from_yaml }}"
+
+    - name: Debug cdn_config
+      debug:
+        var: cdn_config
 
     - name: Update apt package index
       apt:

@@ -41,6 +41,10 @@ def create_dns_resources(tenant_name, tenant_data):
                                                 'tenant_data': tenant_data})
     return result
 
+def create_container(tenant_name, vars_dict):
+    result = run_playbook('deploy_con.yaml', vars_dict)
+    return result
+
 def check_and_update_subnet_state(tenant_name, tenant_data):
     for subnet in tenant_data[tenant_name]['subnets']:
         if subnet['subnet_state'] == 'requested':
@@ -118,22 +122,22 @@ def check_and_create_VM(tenant_name, tenant_data):
 
 def check_and_create_containers(tenant_name, tenant_data):
     for container in tenant_data[tenant_name]['containers']:
-        if container['VM_state'] == 'requested':
+        if container['container_state'] == 'requested':
             vars_dict = {'tenant_name': [tenant_name],
-                        'vm_name': container['name'],
-                        'vm_disk_size': container['disk_size'],
-                        'vm_ram': container['RAM_size'],
-                        'vm_cpus': container['CPUs'],
-                        'vm_network_bridges': container['subnets'],
-                        'origin_server_ip': '192.168.5.2'
+                         'container_num': container['number'],
+                         'server_type': "edge",
+                         'vpc_name': container['vpc'],
+                         'origin_vm_ip': container['origin_server_ip'],
+                         'bridges': container['subnets']
+                        #  'origin_server_ip': '192.168.5.2'
                         }
-            result = create_VM(tenant_name, vars_dict)
+            result = create_container(tenant_name, vars_dict)
 
             if result.rc == 0:
-                container['VM_state'] = 'active'
+                container['container_state'] = 'active'
                 client.put(tenant_name, str(tenant_data))
             else:
-                print("Error occurred while creating VM resources.")
+                print("Error occurred while creating container resources.")
                 sys.exit(1)
 
 def calculate_ip(tenant_name, tenant_data):
@@ -182,9 +186,9 @@ if __name__ == "__main__":
 
         check_and_create_containers(tenant_name, tenant_data)
 
-        check_and_create_VM(tenant_name, tenant_data)
+        # check_and_create_VM(tenant_name, tenant_data)
         
-        check_and_update_cdn_with_dns(tenant_name, tenant_data)  
+        # check_and_update_cdn_with_dns(tenant_name, tenant_data)  
     else:
         print(f"No data found for key: {tenant_name}")
 

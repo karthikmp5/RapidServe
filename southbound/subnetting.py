@@ -1,5 +1,6 @@
 import ipaddress
 import os
+import sys  # Import the sys module to handle command line arguments
 
 # File to store the allocated subnets
 storage_file = 'allocated_subnets.txt'
@@ -34,13 +35,16 @@ def load_allocated_subnets():
     return set()
 
 def main():
-    next_subnet = get_next_subnet('192.168.100.0/24')
+    if len(sys.argv) != 2:
+        print("Usage: python3 script_name.py <base_subnet>")
+        sys.exit(1)  # Exit the script if the base subnet is not provided
+    
+    base_subnet = sys.argv[1]  # Get the base subnet from the command line argument
+    next_subnet = get_next_subnet(base_subnet)
     if next_subnet:
         print(f"{next_subnet}")
     else:
-        print("No more /30 subnets available in the /24 range.")
+        print("No more /30 subnets available in the specified range.")
 
 if __name__ == "__main__":
     main()
-
-

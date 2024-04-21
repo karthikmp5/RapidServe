@@ -1,5 +1,5 @@
 - name: Deploy subnet Infrastructure with bridges and Veth Pairs
-  hosts: localhost
+  hosts: hostvms
   gather_facts: no
   become: true
 
